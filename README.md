@@ -11,7 +11,7 @@ Codex 的 5 小时额度用完时，任务会被中断。lazy-runner 会一直�
 ## 安装
 
 ```sh
-go build -o bin/lazy-runner ./cmd/lazy-runner
+go build -trimpath -o bin/lazy-runner ./cmd/lazy-runner   # -trimpath：不在二进制中嵌入本机路径
 # 可选：放进 PATH
 cp bin/lazy-runner /usr/local/bin/
 ```
@@ -34,7 +34,7 @@ lazy-runner run "修复 CI" -- -m gpt-5.5 -s workspace-write
 ```sh
 lazy-runner resume --list            # 列出最近 7 天因额度中断的会话
 lazy-runner resume --last            # 接管最近一个
-lazy-runner resume 01a1615c-0f92-…   # 按会话 ID、会话名或 lazy-runner 任务 ID 接管
+lazy-runner resume <会话ID>          # 按会话 ID、会话名或 lazy-runner 任务 ID 接管
 ```
 
 > 如果会话还在 Codex Desktop 或 TUI 里开着，codex 会持有这个会话的写锁。lazy-runner 检测到后会发通知并等待，你关闭该会话（或退出应用）后，它会自动续跑。

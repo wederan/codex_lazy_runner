@@ -9,21 +9,21 @@ import (
 )
 
 const (
-	limitedID  = "01a16c5d-7a42-76d1-a339-00ca78c9037a"
-	subagentID = "01a16c5d-2cbe-76e3-b0a9-99c4d7cd91b9"
-	finishedID = "01a1760e-afdb-74f0-8dca-1f5ace2f3b02"
-	parentID   = "01a1615c-0f92-75d1-b99f-c05994500f47"
+	limitedID  = "11111111-1111-4111-8111-111111111111"
+	subagentID = "22222222-2222-4222-8222-222222222222"
+	finishedID = "33333333-3333-4333-8333-333333333333"
+	parentID   = "44444444-4444-4444-8444-444444444444"
 )
 
 // Lines follow the shape of real codex 0.15x rollouts.
 var sampleRollouts = map[string]string{
-	limitedID: `{"timestamp":"2026-10-24T05:23:47.907Z","type":"session_meta","payload":{"id":"` + limitedID + `","forked_from_id":"` + parentID + `","cwd":"/work/app","originator":"codex_cli_rs","cli_version":"0.154.0","source":"cli"}}
-{"timestamp":"2026-10-24T05:23:47.910Z","type":"session_meta","payload":{"id":"` + parentID + `","cwd":"/elsewhere","source":"cli"}}
-{"timestamp":"2026-10-24T05:23:47.933Z","type":"event_msg","payload":{"type":"task_started","turn_id":"t1","started_at":1792819427}}
-{"timestamp":"2026-10-24T05:25:47.511Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{"limit_id":"codex","primary":{"used_percent":91.0,"window_minutes":300,"resets_at":1792998478},"secondary":{"used_percent":14.0,"window_minutes":10080,"resets_at":1793585278}}}}
-{"timestamp":"2026-10-24T05:25:47.512Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{"limit_id":"premium","primary":null,"secondary":null}}}
-{"timestamp":"2026-10-24T05:25:50.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"working"}]}}
-{"timestamp":"2026-10-24T05:27:32.043Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"t1","last_agent_message":null,"error":{"message":"You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at 3:07 PM.","codex_error_info":"usage_limit_exceeded"}}}
+	limitedID: `{"timestamp":"2026-01-01T00:00:00.000Z","type":"session_meta","payload":{"id":"` + limitedID + `","forked_from_id":"` + parentID + `","cwd":"/work/app","originator":"codex_cli_rs","cli_version":"0.154.0","source":"cli"}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"session_meta","payload":{"id":"` + parentID + `","cwd":"/elsewhere","source":"cli"}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"event_msg","payload":{"type":"task_started","turn_id":"t1","started_at":1767225600}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{"limit_id":"codex","primary":{"used_percent":91.0,"window_minutes":300,"resets_at":1767254400},"secondary":{"used_percent":14.0,"window_minutes":10080,"resets_at":1767830400}}}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{"limit_id":"premium","primary":null,"secondary":null}}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"working"}]}}
+{"timestamp":"2026-01-01T00:00:00.000Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"t1","last_agent_message":null,"error":{"message":"You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at 3:07 PM.","codex_error_info":"usage_limit_exceeded"}}}
 `,
 	subagentID: `{"type":"session_meta","payload":{"id":"` + subagentID + `","cwd":"/work/app","source":{"subagent":{"thread_spawn":{"parent_thread_id":"` + parentID + `","depth":1}}}}}
 {"type":"event_msg","payload":{"type":"task_started","turn_id":"s1"}}
@@ -41,11 +41,11 @@ var sampleRollouts = map[string]string{
 // then the finished session, then the limited one.
 func writeHome(t *testing.T) string {
 	home := t.TempDir()
-	dir := filepath.Join(home, "sessions", "2026", "10", "24")
+	dir := filepath.Join(home, "sessions", "2026", "01", "01")
 	os.MkdirAll(dir, 0o755)
 	age := map[string]time.Duration{subagentID: time.Minute, finishedID: 2 * time.Minute, limitedID: 3 * time.Minute}
 	for id, body := range sampleRollouts {
-		p := filepath.Join(dir, "rollout-2026-10-24T13-23-47-"+id+".jsonl")
+		p := filepath.Join(dir, "rollout-2026-01-01T08-00-00-"+id+".jsonl")
 		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -74,7 +74,7 @@ func TestParse(t *testing.T) {
 	if !s.UsageLimited() || s.TurnOpen {
 		t.Errorf("UsageLimited = %v, TurnOpen = %v", s.UsageLimited(), s.TurnOpen)
 	}
-	if s.RateLimits == nil || s.RateLimits.Primary.ResetsAt != 1792998478 {
+	if s.RateLimits == nil || s.RateLimits.Primary.ResetsAt != 1767254400 {
 		t.Errorf("rate limits = %+v", s.RateLimits)
 	}
 
